@@ -1,4 +1,4 @@
-// Package database -----------------------------
+// Package db -----------------------------
 // @file      : mysql.go
 // @author    : Carlos
 // @contact   : 534994749@qq.com

@@ -1,7 +1,7 @@
 package db
 
 import (
-	"changan-offical/pkg/util/snowflake"
+	"github.com/RyCarlos/go-common/utils/snowflake"
 	"gorm.io/gorm"
 	"strconv"
 	"strings"
