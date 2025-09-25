@@ -1,8 +1,8 @@
 package sqls
 
 import (
+	"github.com/RyCarlos/go-common/log"
 	"gorm.io/gorm"
-	"log"
 )
 
 type Query struct {
