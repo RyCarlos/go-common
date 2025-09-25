@@ -1,0 +1,185 @@
+// Package {{.GetPackageName}} -----------------------------
+//
+//	@file		: {{.Config.FileName}}
+//	@author		: Carlos
+//	@contact	: 534994749@qq.com
+//	@time		: {{.Config.CreatedAt}}
+//
+// -------------------------------------------
+package {{.GetPackageName}}
+
+import (
+	"strconv"
+)
+
+type {{.Model.Name}}Controller struct {
+	controllers.BaseController
+}
+
+// List
+// @Summary 查询分页列表
+// @Description  查询分页列表
+// @Tags {{.Model.Comment}}
+// @Produce json
+// @Param data body common.Query true "data"
+// @Success   200   {object}  response.Response{}  "响应对象"
+// @Router /v1/admin/{{.Model.GetNameSnakeCase}}s/list [post]
+func (c {{.Model.Name}}Controller) List(ctx *gin.Context) {
+	// 实例化query
+	params := new(common.Query)
+
+	// 绑定context与req
+	if err := c.MakeContext(ctx).BindParams(params).Validate();err != nil {
+		c.FailWithError(errs.Wrap(err,"bind or verify params failed"))
+		return
+	}
+
+	// 查询分页数据
+	resp := service.{{.Model.Name}}Service.FindPageToPageResp(params.SqlQuery())
+	c.OkWithData(resp)
+}
+
+// Read
+// @Summary 查询
+// @Description  查询
+// @Tags {{.Model.Comment}}
+// @Produce json
+// @Param id path int true "id"
+// @Success   200   {object}  response.Response{data=models.{{.Model.Name}}}  "响应对象"
+// @Router /v1/admin/{{.Model.GetNameSnakeCase}}s/info/{id} [get]
+func (c {{.Model.Name}}Controller) Read(ctx *gin.Context) {
+    c.MakeContext(ctx)
+	idStr := ctx.Param("id")
+    // 验证是否为数字
+    id, err := strconv.ParseInt(idStr, 10, 64)
+    if err != nil {
+        c.FailWithError(errs.Wrap(err, "params error"))
+        return
+    }
+
+	// 查询数据
+	ret, err := service.{{.Model.Name}}Service.Get(id)
+	if err != nil {
+		c.FailWithError(errs.Wrap(err, "query failed"))
+		return
+	}
+	c.OkWithData(ret)
+}
+
+// Create
+// @Summary 创建
+// @Description  创建
+// @Tags {{.Model.Comment}}
+// @Produce json
+// @Param data body {{.GetPackageName}}.{{.Model.Name}}CreateRequest true "data"
+// @Success 200 {object}  response.Response{} "请求成功响应对象"
+// @Router /v1/admin/{{.Model.GetNameSnakeCase}}s/create [post]
+func (c {{.Model.Name}}Controller) Create(ctx *gin.Context) {
+	// 实例化表单参数
+	params := new({{.GetPackageName}}.{{.Model.Name}}CreateRequest)
+
+	// 绑定context与params
+	if err := c.MakeContext(ctx).BindParams(params).Validate(); err != nil {
+		c.FailWithError(errs.Wrap(err, "bind or verify params failed"))
+		return
+	}
+
+	// 写入数据
+	if err := service.{{.Model.Name}}Service.CreateByParams(params); err != nil {
+		c.FailWithError(errs.Wrap(err, "创建失败"))
+		return
+	}
+	c.Ok()
+}
+
+// Update
+// @Summary 更新
+// @Description  更新
+// @Tags {{.Model.Comment}}
+// @Produce json
+// @Param data body {{.GetPackageName}}.{{.Model.Name}}UpdateRequest true "data"
+// @Success 200 {object}  response.Response{} "请求成功响应对象"
+// @Router /v1/admin/{{.Model.GetNameSnakeCase}}s/update/{id} [put]
+func (c {{.Model.Name}}Controller) Update(ctx *gin.Context) {
+    // 实例化表单参数
+	params := new({{.GetPackageName}}.{{.Model.Name}}UpdateRequest)
+
+    // 绑定并验证参数
+    if err := c.MakeContext(ctx).BindParams(params).Validate(); err != nil {
+		c.FailWithError(errs.Wrap(err, "bind or verify params failed"))
+        return
+    }
+
+    // 查询更新的数据
+    ret, err := service.{{.Model.Name}}Service.Get(params.Id)
+    if err != nil {
+		c.FailWithError(errs.Wrap(err, "data not found"))
+        return
+    }
+
+    // 更新
+    if err = copier.Copy(ret, params); err != nil {
+        c.FailWithError(errs.Wrap(err, "copy failed"))
+        return
+    }
+    if err := service.{{.Model.Name}}Service.Update(ret); err != nil {
+		c.FailWithError(errs.Wrap(err, "update failed"))
+        return
+    }
+    c.Ok()
+}
+
+// BatchUpdate
+// @Summary 批量更新
+// @Description  批量更新
+// @Tags {{.Model.Comment}}
+// @Produce json
+// @Param data body {{.GetPackageName}}.{{.Model.Name}}BatchUpdateRequest true "data"
+// @Success 200 {object}  response.Response{} "请求成功响应对象"
+// @Router /v1/admin/{{.Model.GetNameSnakeCase}}s/batch_update [patch]
+func (c {{.Model.Name}}Controller) BatchUpdate(ctx *gin.Context) {
+	// 实例化表单参数
+	params := new({{.GetPackageName}}.{{.Model.Name}}BatchUpdateRequest)
+	// 绑定并验证参数
+	if err := c.MakeContext(ctx).BindParams(params).Validate(); err != nil {
+		c.FailWithError(errs.Wrap(err, "bind or verify params failed"))
+		return
+	}
+	// 更新
+	if err := service.{{.Model.Name}}Service.BatchUpdateByFields(params.Ids, params.Fields); err != nil {
+		c.FailWithError(errs.Wrap(err, "batch update"))
+		return
+	}
+	c.Ok()
+}
+
+{{if .Model.HasDelete -}}
+// Delete
+// @Summary 批量删除
+// @Description  批量删除
+// @Tags {{.Model.Comment}}
+// @Produce json
+// @Param data body common.DeleteRequest true "data"
+// @Success 200 {object}  response.Response{} "请求成功响应对象"
+// @Router /v1/admin/{{.Model.GetNameSnakeCase}}s/del [delete]
+func (c {{.Model.Name}}Controller) Delete(ctx *gin.Context) {
+// 实例化表单参数
+	params := new(common.DeleteRequest)
+	// 绑定并验证参数
+	if err := c.MakeContext(ctx).BindParams(params).Validate(); err != nil {
+		c.FailWithError(errs.Wrap(err, "bind or verify params failed"))
+		return
+	}
+	// 校验参数是否有误
+	count := service.{{.Model.Name}}Service.Count(sqls.NewQuery().In("id", params.Ids))
+	if count != int64(len(params.Ids)) {
+		c.FailWithError(errs.New("参数有误"))
+		return
+	}
+	if !service.{{.Model.Name}}Service.BatchDelete(params.Ids) {
+		c.FailWithError(errs.New("删除失败"))
+		return
+	}
+	c.Ok()
+}
+{{end -}}

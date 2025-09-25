@@ -1,0 +1,177 @@
+// Package {{.Template.GetPackageName}} -----------------------------
+//
+//	@file		: {{.Template.FileName}}
+//	@author		: Carlos
+//	@contact	: 534994749@qq.com
+//	@time		: {{.Template.CreatedAt}}
+//
+// -------------------------------------------
+package {{.Template.GetPackageName}}
+
+type {{.GetStructName}} struct {
+	controllers.BaseController
+}
+
+// List
+// @Summary 查询列表
+// @Description  查询列表
+// @Tags {{.Template.TableInfo.TableComment}}管理
+// @Produce json
+// @Param data body common.Query true "data"
+// @Success   200   {object}  response.Response{}  "响应对象"
+// @Router /v1/admin/{{.Template.TableName}}s/list [post]
+func (c {{.GetStructName}}) List(ctx *gin.Context) {
+	// 实例化query
+	params := new(common.Query)
+
+	// 绑定context与req
+	if err := c.MakeContext(ctx).BindParams(params).Validate();err != nil {
+		c.FailWithError(err)
+		return
+	}
+
+	// 查询分页数据
+	resp := service.{{.Template.TablePascalCaseName}}Service.FindPageToPageResp(params.SqlQuery())
+	c.OkWithData(resp)
+}
+
+// Read
+// @Summary 查询
+// @Description  查询
+// @Tags {{.Template.TableInfo.TableComment}}管理
+// @Produce json
+// @Param id path int true "id"
+// @Success   200   {object}  response.Response{data=models.{{.Template.TablePascalCaseName}}}  "响应对象"
+// @Router /v1/admin/{{.Template.TableName}}s/info/{id} [get]
+func (c {{.GetStructName}}) Read(ctx *gin.Context) {
+    c.MakeContext(ctx)
+	idStr := ctx.Param("id")
+    // 验证是否为数字
+    id, err := strconv.ParseInt(idStr, 10, 64)
+    if err != nil {
+        c.FailWithError(errs.Wrap(err, "params error"))
+        return
+    }
+
+	// 查询数据
+	ret, err := service.{{.Template.TablePascalCaseName}}Service.Get(id)
+	if err != nil {
+		c.FailWithError(errs.Wrap(err, "数据不存在"))
+		return
+	}
+	c.OkWithData(ret)
+}
+
+// Create
+// @Summary 创建
+// @Description  创建
+// @Tags {{.Template.TableInfo.TableComment}}管理
+// @Produce json
+// @Param data body admin.{{.Template.TablePascalCaseName}}CreateRequest true "data"
+// @Success 200 {object}  response.Response{} "请求成功响应对象"
+// @Router /v1/admin/{{.Template.TableName}}s/create [post]
+func (c {{.GetStructName}}) Create(ctx *gin.Context) {
+	// 实例化表单参数
+	params := new(admin.{{.Template.TablePascalCaseName}}CreateRequest)
+
+	// 绑定context与params
+	if err := c.MakeContext(ctx).BindParams(params).Validate(); err != nil {
+		c.FailWithError(err)
+		return
+	}
+
+	// 写入数据
+	if err := service.{{.Template.TablePascalCaseName}}Service.Create(params.ToModel()); err != nil {
+		c.FailWithError(errs.Wrap(err, "创建失败"))
+		return
+	}
+	c.Ok()
+}
+
+// Update
+// @Summary 更新
+// @Description  更新
+// @Tags {{.Template.TableInfo.TableComment}}管理
+// @Produce json
+// @Param data body admin.{{.Template.TablePascalCaseName}}UpdateRequest true "data"
+// @Success 200 {object}  response.Response{} "请求成功响应对象"
+// @Router /v1/admin/{{.Template.TableName}}s/{id} [put]
+func (c {{.GetStructName}}) Update(ctx *gin.Context) {
+    // 实例化表单参数
+	params := new(admin.{{.Template.TablePascalCaseName}}UpdateRequest)
+
+    // 绑定并验证参数
+    if err := c.MakeContext(ctx).BindParams(params).Validate(); err != nil {
+        c.FailWithError(err)
+        return
+    }
+
+    // 查询更新的数据
+    ret, err := service.{{.Template.TablePascalCaseName}}Service.Get(params.Id)
+    if err != nil {
+        c.FailWithError(errs.Wrap(err, "更新失败"))
+        return
+    }
+
+    // 更新
+    if err := service.{{.Template.TablePascalCaseName}}Service.Update(ret); err != nil {
+        c.FailWithError(err)
+        return
+    }
+    c.Ok()
+}
+
+// BatchUpdate
+// @Summary 批量更新
+// @Description  批量更新
+// @Tags {{.Template.TableInfo.TableComment}}管理
+// @Produce json
+// @Param data body admin.{{.Template.TablePascalCaseName}}BatchUpdateRequest true "data"
+// @Success 200 {object}  response.Response{} "请求成功响应对象"
+// @Router /v1/admin/{{.Template.TableName}}s/batch_update [patch]
+func (c {{.GetStructName}}) BatchUpdate(ctx *gin.Context) {
+	// 实例化表单参数
+	params := new(admin.{{.Template.TablePascalCaseName}}BatchUpdateRequest)
+	// 绑定并验证参数
+	if err := c.MakeContext(ctx).BindParams(params).Validate(); err != nil {
+		c.FailWithError(errs.Wrap(err, "validate params"))
+		return
+	}
+	// 更新
+	if err := service.{{.Template.TablePascalCaseName}}Service.BatchUpdateByFields(params.Ids, params.Fields); err != nil {
+		c.FailWithError(errs.Wrap(err, "batch update"))
+		return
+	}
+	c.Ok()
+}
+
+{{if .Template.Columns.SoftDelete -}}
+// Delete
+// @Summary 批量删除
+// @Description  批量删除
+// @Tags {{.Template.TableInfo.TableComment}}管理
+// @Produce json
+// @Param data body common.DeleteRequest true "data"
+// @Success 200 {object}  response.Response{} "请求成功响应对象"
+// @Router /v1/admin/{{.Template.TableName}}s/del [delete]
+func (c {{.GetStructName}}) Delete(ctx *gin.Context) {
+// 实例化表单参数
+	params := new(common.DeleteRequest)
+	// 绑定并验证参数
+	if err := c.MakeContext(ctx).BindParams(params).Validate(); err != nil {
+		c.FailWithError(errs.Wrap(err, "validate params"))
+		return
+	}
+	// 校验参数是否有误
+	count := service.{{.Template.TablePascalCaseName}}Service.Count(sqls.NewQuery().In("id", params.Ids))
+	if count != int64(len(params.Ids)) {
+		c.FailWithError(errs.New("参数有误"))
+		return
+	}
+	if !service.{{.Template.TablePascalCaseName}}Service.BatchDelete(params.Ids) {
+		c.FailWithError(errs.New("删除失败"))
+		return
+	}
+	c.Ok()
+}
+{{end -}}

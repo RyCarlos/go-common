@@ -1,0 +1,28 @@
+// Package {{ .GetPackageName }} -----------------------------
+// @file      : {{ .FileName}}
+// @author    : Carlos
+// @contact   : 534994749@qq.com
+// @time      : {{ .CreatedAt }}
+// -------------------------------------------
+package {{ .GetPackageName }}
+
+// {{.Model.Name}}CreateRequest 新增
+type {{.Model.Name}}CreateRequest struct {
+{{- range $index, $field := .Model.Fields }}
+    {{- if $field.IsShow}}
+    {{$field.Name}} {{$field.Type}} `json:"{{$field.GetNameLowerCamelCase}}"`{{if $field.Comment}} // {{$field.Comment}}{{end}}
+    {{- end}}
+{{- end}}
+}
+
+// {{.Model.Name}}UpdateRequest 更新
+type {{.Model.Name}}UpdateRequest struct {
+	Id int64 `json:"id" binding:"required"`
+    {{.Model.Name}}CreateRequest
+}
+
+// {{.Model.Name}}BatchUpdateRequest 更新
+type {{.Model.Name}}BatchUpdateRequest struct {
+	Ids    []int64                `json:"ids" binding:"required"`	// Ids 指定需要更新的Id列表
+	Fields map[string]interface{} `json:"fields" binding:"required,validate_map_keys="`     // Fields 指定需要更新的字段及其值
+}

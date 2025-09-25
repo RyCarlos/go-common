@@ -1,0 +1,22 @@
+// Package {{ .Template.GetPackageName }} -----------------------------
+// @file      : {{ .FileName}}
+// @author    : Carlos
+// @contact   : 534994749@qq.com
+// @time      : {{ .CreatedAt }}
+// -------------------------------------------
+package {{ .Template.GetPackageName }}
+
+// {{.Template.TablePascalCaseName}} {{.Template.TableInfo.TableComment}}
+type {{.Template.TablePascalCaseName}} struct {
+{{- range $index, $column := .Template.TableInfo.Columns.Values }}
+    {{- if eq $column.Field "id" }}
+    db.AutoId
+    {{- else if eq $column.Field "created_at"}}
+    db.CreateTime
+    {{- else if eq $column.Field "updated_at"}}
+    db.UpdateTime
+    {{- else}}
+    {{.GetFieldPascalCase}} {{.TypeToGoType}} `json:"{{.GetFieldCameCase}}"`{{if .Comment}} // {{.Comment}}{{end}}
+    {{- end}}
+{{- end}}
+}

@@ -1,0 +1,13 @@
+// Package {{ .GetPackageName }} -----------------------------
+// @file      : {{ .FileName}}
+// @author    : Carlos
+// @contact   : 534994749@qq.com
+// @time      : {{ .CreatedAt }}
+// -------------------------------------------
+package {{ .GetPackageName }}
+
+var {{.Model.Name}}Service {{.Model.GetNameUpperCamelCase}}Service
+
+type {{.Model.GetNameUpperCamelCase}}Service struct {
+	BaseService[models.{{.Model.Name}}]
+}

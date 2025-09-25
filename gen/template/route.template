@@ -1,0 +1,40 @@
+// Package {{ .GetPackageName }} -----------------------------
+// @file      : {{ .FileName}}
+// @author    : Carlos
+// @contact   : 534994749@qq.com
+// @time      : {{ .CreatedAt }}
+// -------------------------------------------
+package {{ .GetPackageName }}
+
+import (
+
+)
+
+func Register{{.Model.Name}}Routes(rg *gin.RouterGroup) {
+	var (
+		needLoginGroup gin.IRoutes
+		// noNeedLoginGroup gin.IRoutes
+	)
+
+    // 实例化控制器
+	controller := new({{ .GetPackageName }}.{{.Model.Name}}Controller)
+    group := rg.Group("{{.Model.GetNameSnakeCase}}s")
+	// 需要登录的
+	needLoginGroup = group.Group("").Use(middleware.Auth())
+	{
+        needLoginGroup.POST("list", controller.List)
+        needLoginGroup.POST("create", controller.Create)
+        needLoginGroup.GET("info/:id", controller.Read)
+        needLoginGroup.PUT("update/:id", controller.Update)
+        needLoginGroup.PATCH("batch_update", controller.BatchUpdate)
+        {{if .Model.HasDelete -}}
+        needLoginGroup.POST("/del", controller.Delete)
+    {{end -}}
+	}
+
+	// 不需要登录的
+	// noNeedLoginGroup = group.Group("")
+	{
+
+	}
+}
