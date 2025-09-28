@@ -26,6 +26,7 @@ type Config struct {
 // InitMysql 初始化mysql
 func InitMysql(config *Config) (*gorm.DB, error) {
 	gConfig := &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: true,
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   config.TablePrefix, // 增加表前缀
 			SingularTable: true,               // 使用单数表名
